@@ -1,21 +1,29 @@
 "use strict";
-let outdata;
+
 const promise = getJson("https://dummyjson.com/products");
 
 async function getJson(url) {
   const products = document.querySelector(".product--container");
-  const data = fetch(url);
-  const result = await data;
+  try {
+    const data = fetch(url);
+    if (!data.ok) {
+      throw new Error(`No internet connection`);
+    }
+    const result = await data;
 
-  if (!result.ok) throw new Error("Something went wrong");
-  result.json().then(function (data) {
-    outdata = data;
-    const head = genHead(Object.keys(data.products[0]));
+    if (!result.ok) throw new Error("Something went wrong");
+    result.json().then(function (data) {
+      outdata = data;
+      const head = genHead(Object.keys(data.products[0]));
 
-    const body = parseBody(data);
-    const htmlTable = `<table><tr>${head}</tr>${body}</table>`;
-    products.insertAdjacentHTML("beforeend", htmlTable);
-  });
+      const body = parseBody(data);
+      const htmlTable = `<table><tr>${head}</tr>${body}</table>`;
+      products.insertAdjacentHTML("beforeend", htmlTable);
+    });
+  } catch (error) {
+    products.insertAdjacentText("beforeend", error);
+    console.log("error", error);
+  }
 }
 
 function genHead(list) {
